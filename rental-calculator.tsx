@@ -54,21 +54,50 @@ const RentalCalculator: React.FC = () => {
   const [isDiscountRateOpen, setIsDiscountRateOpen] = useState<boolean>(false);
   const [isRentalFeeRateOpen, setIsRentalFeeRateOpen] = useState<boolean>(false);
 
-  // 공급단가율 변경 핸들러
+  // 입력용 문자열 상태
+  const [supplyRateInput, setSupplyRateInput] = useState<string>(supplyRatePercent.toString());
+  const [discountRateInputs, setDiscountRateInputs] = useState<{[key: number]: string}>({
+    12: '102', 24: '106', 36: '111', 48: '116'
+  });
+  const [rentalFeeRateInputs, setRentalFeeRateInputs] = useState<{[key: number]: string}>({
+    12: '21', 24: '26', 36: '28', 48: '31'
+  });
+
+  // 공급단가율 변경 핸들러 (입력 중)
   const handleSupplyRateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
+    setSupplyRateInput(e.target.value);
+  };
+
+  // 공급단가율 blur 핸들러 (입력 완료 시)
+  const handleSupplyRateBlur = () => {
+    const value = parseFloat(supplyRateInput);
     if (!isNaN(value) && value > 0) {
       setSupplyRatePercent(value);
+    } else {
+      setSupplyRateInput(supplyRatePercent.toString());
     }
   };
 
-  // 할인률 변경 핸들러
+  // 할인률 변경 핸들러 (입력 중)
   const handleDiscountRateChange = (period: number, e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
+    setDiscountRateInputs({
+      ...discountRateInputs,
+      [period]: e.target.value
+    });
+  };
+
+  // 할인률 blur 핸들러 (입력 완료 시)
+  const handleDiscountRateBlur = (period: number) => {
+    const value = parseFloat(discountRateInputs[period]);
     if (!isNaN(value) && value > 0) {
       setDiscountRates({
         ...discountRates,
         [period]: value
+      });
+    } else {
+      setDiscountRateInputs({
+        ...discountRateInputs,
+        [period]: discountRates[period].toString()
       });
     }
   };
@@ -76,6 +105,7 @@ const RentalCalculator: React.FC = () => {
   // 공급단가율 선택 핸들러
   const handleSupplyRateSelect = (value: number) => {
     setSupplyRatePercent(value);
+    setSupplyRateInput(value.toString());
     setIsSupplyRateOpen(false);
   };
 
@@ -545,11 +575,11 @@ const RentalCalculator: React.FC = () => {
                         <div className="p-2 border-t">
                           <div className="flex items-center">
                             <input
-                              type="number"
-                              min="1"
-                              step="0.1"
-                              value={supplyRatePercent}
+                              type="text"
+                              inputMode="decimal"
+                              value={supplyRateInput}
                               onChange={handleSupplyRateChange}
+                              onBlur={handleSupplyRateBlur}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                               onClick={(e) => e.stopPropagation()}
                             />
@@ -644,11 +674,11 @@ const RentalCalculator: React.FC = () => {
                           </div>
                           <div className="relative">
                             <input
-                              type="number"
-                              min="1"
-                              step="0.1"
-                              value={discountRates[period]}
+                              type="text"
+                              inputMode="decimal"
+                              value={discountRateInputs[period]}
                               onChange={(e) => handleDiscountRateChange(period, e)}
+                              onBlur={() => handleDiscountRateBlur(period)}
                               className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${selectedPeriod === period ? 'border-blue-300 focus:ring-2 focus:ring-blue-500' : 'border-gray-300'}`}
                             />
                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -714,11 +744,26 @@ const RentalCalculator: React.FC = () => {
                           </div>
                           <div className="relative">
                             <input
-                              type="number"
-                              min="0"
-                              step="0.1"
-                              value={rentalFeeRates[period]}
-                              onChange={(e) => handleRentalFeeRateSelect(period, parseFloat(e.target.value))}
+                              type="text"
+                              inputMode="decimal"
+                              value={rentalFeeRateInputs[period]}
+                              onChange={(e) => {
+                                setRentalFeeRateInputs({
+                                  ...rentalFeeRateInputs,
+                                  [period]: e.target.value
+                                });
+                              }}
+                              onBlur={() => {
+                                const value = parseFloat(rentalFeeRateInputs[period]);
+                                if (!isNaN(value) && value >= 0) {
+                                  handleRentalFeeRateSelect(period, value);
+                                } else {
+                                  setRentalFeeRateInputs({
+                                    ...rentalFeeRateInputs,
+                                    [period]: rentalFeeRates[period].toString()
+                                  });
+                                }
+                              }}
                               className={`w-full px-3 py-2 border rounded-lg transition-all duration-200 ${selectedPeriod === period ? 'border-blue-300 focus:ring-2 focus:ring-blue-500' : 'border-gray-300'}`}
                             />
                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

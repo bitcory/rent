@@ -16,6 +16,17 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
+// Input 컴포넌트를 외부로 분리 (매 렌더링마다 새로 생성되지 않도록)
+const Input = ({ label, ...props }) => (
+  <div>
+    <label className="block text-xs font-medium text-slate-600 mb-1.5">{label}</label>
+    <input
+      {...props}
+      className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition-all"
+    />
+  </div>
+);
+
 const RentalCalculator = () => {
   const [products, setProducts] = useState([]);
   const [supplyRatePercent, setSupplyRatePercent] = useState(75);
@@ -70,7 +81,8 @@ const RentalCalculator = () => {
   };
 
   const handleSingleProductChange = (e) => {
-    setSingleProduct({ ...singleProduct, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setSingleProduct(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAddSingleProduct = () => {
@@ -209,14 +221,6 @@ const RentalCalculator = () => {
       <Icon className="w-4 h-4" />
       {label}
     </button>
-  );
-
-  // Soft Blue Theme Input
-  const Input = ({ label, ...props }) => (
-    <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1.5">{label}</label>
-      <input {...props} className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition-all" />
-    </div>
   );
 
   return (
