@@ -155,7 +155,7 @@ const RentalCalculator = () => {
         const totalRentalFee = product.price * discountRate;
         const monthlyRentalFee = Math.round(totalRentalFee / period / 10) * 10;
         const rentalFee = Math.round(totalRentalFee * (rentalFeeRates[period] / 100) / 10) * 10;
-        const operatingFee = Math.round(monthlyRentalFee * (operatingFeeRates[period] / 100) / 10) * 10;
+        const operatingFee = Math.round(totalRentalFee * (operatingFeeRates[period] / 100) / 10) * 10;
         return { period, discountRate: discountRates[period], totalRentalFee, monthlyRentalFee, rentalFee, operatingFee };
       });
       return { ...product, supplyPrice, adjustedPrice, rentalInfos };
